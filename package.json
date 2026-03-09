@@ -1,0 +1,32 @@
+{
+  "name": "p-008",
+  "version": "1.0.0",
+  "description": "### Thin Git integration layer",
+  "main": "dist/cli/index.js",
+  "bin": {
+    "p-008": "dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/cli/index.js",
+    "dev": "ts-node src/cli/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abedshaaban/p-008.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/abedshaaban/p-008/issues"
+  },
+  "homepage": "https://github.com/abedshaaban/p-008#readme",
+  "dependencies": {
+    "@types/node": "^25.3.5",
+    "commander": "^14.0.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
