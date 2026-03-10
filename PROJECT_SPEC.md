@@ -1,12 +1,12 @@
-# octi — Workspace-Ready Git Wrapper
+# octai — Workspace-Ready Git Wrapper
 
 ## Overview
 
-`octi` is a workspace-first CLI built on top of Git.
+`octai` is a workspace-first CLI built on top of Git.
 
 Its main goal is to make repository cloning and branch checkout naturally support multiple parallel workspaces from day one.
 
-Instead of the usual Git layout where a repository is cloned into a single folder, `octi` creates a project folder that is already structured for workspaces:
+Instead of the usual Git layout where a repository is cloned into a single folder, `octai` creates a project folder that is already structured for workspaces:
 
 ```text
 project-name/
@@ -35,7 +35,7 @@ This gives the user direct visibility into all active branches/workspaces and ma
 
 Product Direction
 
-octi is not a Git replacement.
+octai is not a Git replacement.
 
 It is a workspace orchestration layer on top of Git using:
 
@@ -61,11 +61,11 @@ This is optimized for visibility, observability, and easy switching between bran
 
 Phase 1 Goal
 
-Build the first working version of octi with only these core flows:
+Build the first working version of octai with only these core flows:
 
-octi clone <repo-url>
+octai clone <repo-url>
 
-octi checkout <branch-name>
+octai checkout <branch-name>
 
 optional -f <base-branch> for checkout
 
@@ -105,7 +105,7 @@ Instead of cloning into:
 
 /project-name
 
-and then later creating worktrees elsewhere, octi should create:
+and then later creating worktrees elsewhere, octai should create:
 
 /project-name/<default-branch>/code
 
@@ -123,7 +123,7 @@ my-app/
 
 Then when the user runs:
 
-octi checkout feature-auth
+octai checkout feature-auth
 
 it creates:
 
@@ -194,7 +194,7 @@ my-app/
     code/
 Clone Flow
 Command
-octi clone https://github.com/org/repo.git
+octai clone https://github.com/org/repo.git
 Expected behavior
 
 infer the project name from the repo URL
@@ -368,7 +368,7 @@ Store the mapping in state.json.
 
 Project Root Discovery
 
-octi checkout must work from anywhere inside a workspace.
+octai checkout must work from anywhere inside a workspace.
 
 The CLI should walk upward from the current working directory until it finds:
 
@@ -458,7 +458,7 @@ utils/slug.ts
 utils/findProjectRoot.ts
 
 Technical Requirements
-octi clone <repo-url> must:
+octai clone <repo-url> must:
 
 validate the repo URL
 
@@ -480,7 +480,7 @@ write config.json
 
 write state.json
 
-octi checkout <branch-name> must:
+octai checkout <branch-name> must:
 
 work only inside an existing p-008 project
 
@@ -539,7 +539,7 @@ Acceptance Criteria
 The implementation is successful when all of these work.
 
 Scenario 1 — clone
-octi clone https://github.com/org/my-app.git
+octai clone https://github.com/org/my-app.git
 
 Creates:
 
@@ -557,7 +557,7 @@ Scenario 2 — checkout from default base
 
 Inside the project:
 
-octi checkout feature-auth
+octai checkout feature-auth
 
 Creates:
 
@@ -568,7 +568,7 @@ my-app/
 And the new branch is based on the configured default base branch.
 
 Scenario 3 — checkout from custom base
-octi checkout hotfix-login -f release
+octai checkout hotfix-login -f release
 
 Creates:
 
@@ -584,7 +584,7 @@ After multiple checkouts, state.json correctly lists all workspaces and their ma
 
 Scenario 5 — path discovery
 
-Running octi checkout ... from anywhere inside one of the /code folders still finds the project root correctly.
+Running octai checkout ... from anywhere inside one of the /code folders still finds the project root correctly.
 
 Implementation Plan
 Step 1
@@ -645,11 +645,11 @@ The main outcome should be a clean, working CLI that proves this workspace-first
 
 Deliverable
 
-Build the first working version of octi with:
+Build the first working version of octai with:
 
-octi clone <repo-url>
+octai clone <repo-url>
 
-octi checkout <branch-name>
+octai checkout <branch-name>
 
 optional -f <base-branch>
 
