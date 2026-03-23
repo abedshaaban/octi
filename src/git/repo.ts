@@ -69,6 +69,15 @@ export async function ensureBaseBranchExists(gitDir: string, baseBranch: string)
   }
 }
 
+export async function remoteBranchExists(gitDir: string, branch: string): Promise<boolean> {
+  try {
+    await git(["rev-parse", "--verify", `refs/remotes/origin/${branch}`], { gitDir });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function ensureLocalBranch(
   gitDir: string,
   branch: string,

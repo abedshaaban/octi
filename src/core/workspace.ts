@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { findProjectRoot } from "../utils/findProjectRoot";
-import { loadConfig, loadState } from "../config/load";
+import { loadState } from "../config/load";
 import { saveState } from "../config/save";
 import type { ProjectState } from "../config/types";
 import { branchToFolderSlug, resolveSlugCollision } from "../utils/slug";
@@ -10,13 +10,13 @@ import {
   ensureBaseBranchExists,
   ensureLocalBranch,
   createWorktree,
+  remoteBranchExists,
 } from "../git/repo";
 
 export interface CheckoutWorkspaceInput {
   branchName: string;
   baseBranchOverride?: string | undefined;
   cwd: string;
-  createNewBranch?: boolean;
 }
 
 export interface CheckoutWorkspaceResult {
@@ -24,33 +24,28 @@ export interface CheckoutWorkspaceResult {
   workspacePath: string;
   branch: string;
   baseBranch: string;
+  usedExistingRemoteBranch: boolean;
 }
 
 export async function checkoutWorkspace(
   input: CheckoutWorkspaceInput,
 ): Promise<CheckoutWorkspaceResult> {
-  const { branchName, baseBranchOverride, cwd, createNewBranch = false } = input;
+  const { branchName, baseBranchOverride, cwd } = input;
 
   const projectRoot = findProjectRoot(cwd);
   if (!projectRoot) {
     throw new Error("not inside a gitmedaddy project");
   }
 
-  const config = await loadConfig(projectRoot);
   const state = await loadState(projectRoot);
 
-  // When explicitly creating a new branch (-n/--new), always base it on the
-  // configured default base branch from the project settings, ignoring any
-  // override. This guarantees we fetch and branch from the "main" branch
-  // defined in the config.
-  const baseBranch = createNewBranch
-    ? config.defaultBaseBranch
-    : (baseBranchOverride ?? config.defaultBaseBranch);
+  const baseBranch = baseBranchOverride ?? state.defaultBaseBranch;
 
   const gitDir = path.join(projectRoot, ".gmd", "repo.git");
 
   await fetchLatest(gitDir);
   await ensureBaseBranchExists(gitDir, baseBranch);
+  const usedExistingRemoteBranch = await remoteBranchExists(gitDir, branchName);
 
   const desiredSlug = branchToFolderSlug(branchName);
   const existingSlugs = new Set(state.workspaces.map((w) => w.folder));
@@ -75,7 +70,7 @@ export async function checkoutWorkspace(
     throw error;
   }
 
-  await ensureLocalBranch(gitDir, branchName, baseBranch, createNewBranch);
+  await ensureLocalBranch(gitDir, branchName, baseBranch, !usedExistingRemoteBranch);
   await createWorktree(gitDir, workspaceDir, branchName);
 
   const newEntry = {
@@ -87,6 +82,7 @@ export async function checkoutWorkspace(
   };
 
   const newState: ProjectState = {
+    defaultBaseBranch: state.defaultBaseBranch,
     workspaces: [...state.workspaces, newEntry],
   };
 
@@ -97,5 +93,6 @@ export async function checkoutWorkspace(
     workspacePath: workspaceDir,
     branch: branchName,
     baseBranch,
+    usedExistingRemoteBranch,
   };
 }

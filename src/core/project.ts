@@ -70,6 +70,7 @@ export async function cloneProject(input: CloneProjectInput): Promise<CloneProje
   };
 
   const state: ProjectState = {
+    defaultBaseBranch: defaultBranch,
     workspaces: [
       {
         branch: defaultBranch,

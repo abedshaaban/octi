@@ -10,8 +10,8 @@ export async function saveConfig(projectRoot: string, config: ProjectConfig): Pr
 }
 
 export async function saveState(projectRoot: string, state: ProjectState): Promise<void> {
-  const stateDir = path.join(projectRoot, ".gmd");
-  const statePath = path.join(stateDir, "state.json");
+  const stateDir = path.join(projectRoot, "state");
+  const statePath = path.join(stateDir, "branches.json");
   await fs.mkdir(stateDir, { recursive: true });
   await fs.writeFile(statePath, `${JSON.stringify(state, null, 2)}\n`, "utf8");
 }
