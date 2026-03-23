@@ -1,70 +1,131 @@
 # AI native versioning layer that speaks to Git | Git wrapper for AI
 
-## Thin Git integration layer
+`gmd` (gitmedaddy) is a thin wrapper around Git for AI and human workflows that run in parallel.
+It does not replace Git. It organizes your local branches as separate folders using Git worktrees.
 
-gitmedaddy (gmd) is not a replacement of git. It is quite the opposite, it is a wrapper of git that handels things better for us and makes things easier for AI. Under the hood it is all git.
+## Why use gmd
 
-Handles:
+Traditional local Git flow usually centers around one checked-out branch at a time.
+That makes parallel work harder when multiple agents (or people) need to work on separate tasks.
 
-- cloning a repo
-- branch creation
-<!-- -
-- worktrees -->
-<!-- - commits -->
+With `gmd`, each branch gets its own local workspace folder:
 
-### Overview
+- work on multiple branches side-by-side
+- reduce checkout/context switching
+- keep one branch per PR goal
+- stay fully compatible with standard Git commands
 
-#### Cloning A Repo
+## Quick Start
 
-gmd supports cloning. It is the same as cloning a repo via git `git clone ...` but with a different structure. You clone the repo branche to your folder.
+```bash
+# Clone into a gmd workspace layout
+gmd clone https://github.com/OWNER/PROJECT_NAME.git
 
-example:
-`gmd clone https://github.com/OWNER/PROJECT_NAME.git`
+# Create a new branch workspace from your default base branch
+gmd new feat/create-footer
+```
 
-Then it will ask me couple of questions:
+After clone, the CLI asks:
 
-- what is the main branch that you would like to checkout from everytime? (defaults to main)
+- What is your main branch to create new branches from? (defaults to `main`)
 
-output:
+Your answer is stored in `state/branches.json`, which keeps branch workflow metadata.
 
-    PROJECT_NAME
-        └── state/
-        └── MAIN_BRANCH
-            └──src/
-            └──package.json
+To create a new branch workspace, run:
 
-Notice how your folder structure is around your branches and not the current state of a single branch. So your next step to start a repo is going to be `cd MAIN_BRANCH`, `pnpm i`, ....
+```bash
+gmd new <branch-name>
+```
 
-Why did we go with this structure because I wanted to have multiple agents work on different parts of my projects and sometimes the same page with 2 different features. So it feals hard to distinguise which change is which. Plus each PR should have a single **GOAL** to achieve. And we do so by utilize the git worktree.
+This creates the branch from the default base branch configured in `state/branches.json`.  
+If you want a different base branch for this run, pass `-f` or `--from`:
 
-Inside the state/ folder we have a meta.json file that contains the state of our workflow and our git purpose. Like the one we just got asked "what is the main branch ... ?" this is since we may need to checkout/ create branches multiple times from the main branch or a staging one but you are not at that curent branch since you are doing changes on a different one. thats where the main checkout branch comes in handy. you checkout from that one always. Don't worry, you can override that and pass the branch you want to checkout from if you want the current one. like so `gmd new ... -h` -h means checkout/ create a new branch from this current branch.
+```bash
+gmd new <branch-name> --from staging
+```
 
-#### Creating Branches
+## What the workspace looks like
 
-Creating a local branch with gmd will create a new subfolder locally with the branch name being the subfolder name.
+After clone:
 
-example:
+```text
+PROJECT_NAME/
+├── state/
+└── main/
+    ├── src/
+    └── package.json
+```
 
-    PROJECT_NAME
-        └── state/
-        └── MAIN_BRANCH
-            └──src/
-            └──package.json
+```text
+gmd new feat/create-footer
+```
 
-`gmd new feat/create-footer`
+After creating a new branch workspace:
 
-you get prompted a question:
+```text
+PROJECT_NAME/
+├── state/
+├── main/
+│   ├── src/
+│   └── package.json
+└── feat/create-footer/
+    ├── src/
+    └── package.json
+```
 
-- What is the goal of this branch? // not required and can be left empty.
-  the answer is added to the /state folder and contains the new local branch name with its goal to achieve.
+## Demo Workflow
 
-      PROJECT_NAME
-          └── state/
-          └── MAIN_BRANCH
-              └──src/
-              └──package.json
-          └── feat/create-footer
-              └──src/
-              └──package.json
+### 1) Clone a repository
 
-This enables an agent to work on a local branch that you are able to check in the browser aside from stoping your current work on another branch and relying on a single angent for a single change per PR. And An agent can always check if the PR has achieved its goal by checking teh branch goal. (every pr should have a single goal to work on)
+```bash
+gmd clone https://github.com/OWNER/PROJECT_NAME.git
+```
+
+This creates a project folder with:
+
+- a `state/` directory for workflow metadata
+- a base branch workspace (commonly `main/`)
+
+### 2) Create a new branch workspace
+
+```bash
+gmd new feat/create-footer
+```
+
+This creates a new workspace folder for `feat/create-footer` so it can be developed in parallel with other branches.  
+You do not need a separate checkout step because each branch already exists as its own folder.
+
+### 3) Choose a custom base branch (optional)
+
+```bash
+gmd new feat/create-footer --from staging
+```
+
+Use `--from` when you want to branch from something other than the default base branch.
+
+## Command Reference
+
+### clone
+
+```bash
+gmd clone <repo-url>
+```
+
+Clone a Git repository into a workspace-ready folder structure.
+
+### new
+
+```bash
+# create a new workspace branch from the default base branch
+gmd new <branch-name>
+
+# create a new workspace branch from a specific base branch
+gmd new <branch-name> --from <base-branch>
+```
+
+Create a new branch workspace. By default, `--from` uses the configured base branch.
+
+## Under the Hood
+
+`gmd` is built on top of Git worktrees and Git branches.
+Your repositories remain normal Git repositories; `gmd` only improves local workspace orchestration for parallel workflows.
