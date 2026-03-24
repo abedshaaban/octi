@@ -13,12 +13,12 @@ It keeps Git as the source of truth while organizing each branch as its own loca
 
 ## Why use it
 
-Traditional local Git flow usually centers on one checked-out branch at a time.
-`gmd` removes that bottleneck by keeping multiple branches visible side-by-side.
+Git worktrees already let you check out more than one branch at a time; the hard part is keeping branches organized, named, and discoverable as your list grows.
+`gmd` is a thin layer on top of worktrees: one folder per branch, consistent layout, and project metadata so PR-sized goals stay easy to find and switch between.
 
-- Work on several branches at once
-- Reduce checkout/context switching
-- Keep one branch workspace per task/goal
+- Manage many branch workspaces without hand-maintaining worktree paths and bases
+- Reduce mental overhead versus ad hoc `git worktree` workflows
+- Keep one workspace per task/goal with state tracked in the repo
 - Stay fully compatible with normal Git commands
 
 ## Installation
