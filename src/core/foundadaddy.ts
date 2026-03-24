@@ -14,6 +14,28 @@ import { promptSelect } from '../utils/prompt'
 import { branchToFolderSlug } from '../utils/slug'
 import type { ProjectState } from '../config/types'
 
+/** Move every top-level entry under `projectRoot` into `projectRoot/subfolderName`, matching `gmd clone` layout. */
+async function relocateProjectIntoBranchFolder(projectRoot: string, subfolderName: string): Promise<string> {
+  const workspacePath = path.join(projectRoot, subfolderName)
+
+  try {
+    await fs.mkdir(workspacePath, { recursive: false })
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'EEXIST') {
+      throw new Error(`workspace folder "${subfolderName}" already exists`)
+    }
+    throw error
+  }
+
+  const entries = await fs.readdir(projectRoot)
+  for (const name of entries) {
+    if (name === subfolderName) continue
+    await fs.rename(path.join(projectRoot, name), path.join(workspacePath, name))
+  }
+
+  return workspacePath
+}
+
 export interface FoundADaddyInput {
   cwd: string
 }
@@ -71,8 +93,9 @@ export async function foundADaddy(input: FoundADaddyInput): Promise<FoundADaddyR
   let folderName: string
 
   if (currentBranch !== 'HEAD' && currentBranch === defaultBaseBranch) {
-    workspacePath = projectRoot
-    folderName = '.'
+    // Same layout as `gmd clone`: `<projectRoot>/<defaultBranch>/` holds the repo; `state/` lives at `projectRoot`.
+    workspacePath = await relocateProjectIntoBranchFolder(projectRoot, defaultBaseBranch)
+    folderName = defaultBaseBranch
   } else {
     const workspaceFolderName = branchToFolderSlug(defaultBaseBranch)
     workspacePath = path.join(projectRoot, workspaceFolderName)
