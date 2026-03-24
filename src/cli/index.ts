@@ -7,6 +7,7 @@ import { registerFoundADaddyCommand } from '../commands/foundadaddy'
 import { registerHideCommand } from '../commands/hide'
 import { registerMergeCommand } from '../commands/merge'
 import { registerNewCommand } from '../commands/new'
+import { registerPrCommand } from '../commands/pr'
 import { registerPullCommand } from '../commands/pull'
 import { registerSetGoalCommand } from '../commands/setgoal'
 import { registerShowCommand } from '../commands/show'
@@ -27,6 +28,7 @@ export function createCli() {
   registerCleanCommand(program)
   registerPullCommand(program)
   registerMergeCommand(program)
+  registerPrCommand(program)
 
   return program
 }
