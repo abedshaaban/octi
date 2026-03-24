@@ -10,6 +10,8 @@ export interface CreatePullRequestInput {
   baseBranchOverride?: string | undefined
   titleOverride?: string | undefined
   draft?: boolean | undefined
+  /** When true, passes `--assignee @me` to `gh pr create`. */
+  assignSelf?: boolean | undefined
 }
 
 export interface CreatePullRequestResult {
@@ -64,7 +66,7 @@ function runGh(args: Array<string>, cwd: string): Promise<{ stdout: string; stde
 }
 
 export async function createPullRequest(input: CreatePullRequestInput): Promise<CreatePullRequestResult> {
-  const { cwd, baseBranchOverride, titleOverride, draft = false } = input
+  const { cwd, baseBranchOverride, titleOverride, draft = false, assignSelf = false } = input
 
   const projectRoot = findProjectRoot(cwd)
   if (!projectRoot) {
@@ -93,6 +95,9 @@ export async function createPullRequest(input: CreatePullRequestInput): Promise<
   const args = ['pr', 'create', '--base', baseBranch, '--head', branch, '--title', title, '--body', body]
   if (draft) {
     args.push('--draft')
+  }
+  if (assignSelf) {
+    args.push('--assignee', '@me')
   }
 
   const { stdout } = await runGh(args, workspacePath)
