@@ -1,6 +1,7 @@
 {
   "name": "gitmedaddy",
   "version": "0.0.3",
+  "packageManager": "pnpm@10.18.2",
   "description": "Thin Git integration layer for managing multi-branch worktrees",
   "main": "dist/cli/index.js",
   "files": [
@@ -12,7 +13,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "pnpm run build",
     "start": "node dist/cli/index.js",
     "dev": "ts-node src/cli/index.ts",
     "cipublish": "node publish.mjs",
@@ -36,6 +37,7 @@
   },
   "homepage": "https://github.com/abedshaaban/gitmedaddy#readme",
   "dependencies": {
+    "@inquirer/prompts": "^8.3.2",
     "commander": "^14.0.3"
   },
   "devDependencies": {

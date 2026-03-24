@@ -76,10 +76,13 @@ export async function cloneProject(input: CloneProjectInput): Promise<CloneProje
   )
 
   const workspaceDir = path.join(projectRoot, defaultBranch)
-  await git(['clone', '-b', defaultBranch, repoUrl, workspaceDir], { cwd: projectRoot })
+  await git(['clone', '--verbose', '--progress', '-b', defaultBranch, repoUrl, workspaceDir], {
+    cwd: projectRoot,
+    inheritStdio: true
+  })
 
   const commonDir = await resolveGitCommonDir(workspaceDir)
-  await git(['fetch', 'origin'], { gitDir: commonDir })
+  await git(['fetch', '--verbose', '--progress', 'origin'], { gitDir: commonDir, inheritStdio: true })
 
   const config: ProjectConfig = {
     version: 1,
