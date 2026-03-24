@@ -1,6 +1,6 @@
 {
   "name": "gitmedaddy",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "description": "Thin Git integration layer for managing multi-branch worktrees",
   "main": "dist/cli/index.js",
