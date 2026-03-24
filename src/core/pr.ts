@@ -87,7 +87,8 @@ export async function createPullRequest(input: CreatePullRequestInput): Promise<
   const baseBranch = baseBranchOverride ?? state.defaultBaseBranch
   const title = titleOverride ?? workspace.folderName
   const goal = workspace.goal.trim()
-  const body = goal ? `## Goal\n${goal}\n` : ''
+  const goalBody = goal || '-'
+  const body = `## Goal\n\n${goalBody}\n\n`
 
   const workspacePath = path.join(projectRoot, workspace.folderName)
   await git(['push', '-u', 'origin', branch], { cwd: workspacePath })
