@@ -68,6 +68,7 @@ export interface CleanWorkspacesInput {
 export interface CleanWorkspacesResult {
   projectRoot: string
   keptBranch: string
+  preservedBranches: Array<string>
   removedBranches: Array<string>
 }
 
@@ -384,38 +385,38 @@ export async function cleanWorkspaces(input: CleanWorkspacesInput): Promise<Clea
 
   return withStateLock(projectRoot, async () => {
     const state = await loadState(projectRoot)
+    const keptWorkspaces: Array<ProjectState['workspaces'][number]> = []
     const removedBranches: Array<string> = []
 
     for (const workspace of state.workspaces) {
-      if (workspace.branch === targetKeepBranch) continue
-      if (workspace.folderName === '.') {
-        throw new Error('cannot remove the repository root workspace; choose a different branch to keep')
-      }
       const workspaceDir = path.join(projectRoot, workspace.folderName)
-      if (await isPrimaryWorktree(gitDir, workspaceDir)) {
-        throw new Error(
-          'cannot remove the primary Git workspace; choose a different branch to keep that is checked out in a linked worktree, or delete the project manually'
-        )
+      const isPrimary = workspace.folderName === '.' || (await isPrimaryWorktree(gitDir, workspaceDir))
+
+      if (workspace.branch === targetKeepBranch || isPrimary) {
+        keptWorkspaces.push(workspace)
+        continue
       }
+
       await removeWorktree(gitDir, workspaceDir)
       removedBranches.push(workspace.branch)
     }
 
-    const keptWorkspace = state.workspaces.find((w) => w.branch === targetKeepBranch)
-    if (!keptWorkspace) {
+    const preservedBranches = Array.from(new Set(keptWorkspaces.map((workspace) => workspace.branch)))
+    if (!preservedBranches.includes(targetKeepBranch)) {
       throw new Error('keep branch is missing from workspaces')
     }
 
     const newState: ProjectState = {
       defaultBaseBranch: state.defaultBaseBranch,
       settings: state.settings,
-      workspaces: [keptWorkspace]
+      workspaces: keptWorkspaces
     }
     await saveState(projectRoot, newState)
 
     return {
       projectRoot,
       keptBranch: targetKeepBranch,
+      preservedBranches,
       removedBranches
     }
   })
