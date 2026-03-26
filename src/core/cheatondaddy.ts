@@ -12,7 +12,7 @@ export interface CheatOnDaddyInput {
 export interface CheatOnDaddyResult {
   projectRoot: string
   restoredBranch: string
-  removedWorkspaces: string[]
+  removedWorkspaces: Array<string>
 }
 
 export async function cheatOnDaddy(input: CheatOnDaddyInput): Promise<CheatOnDaddyResult> {
@@ -36,7 +36,7 @@ export async function cheatOnDaddy(input: CheatOnDaddyInput): Promise<CheatOnDad
 
   await fs.access(bareGitDir)
 
-  const removedWorkspaces: string[] = []
+  const removedWorkspaces: Array<string> = []
   for (const workspace of state.workspaces) {
     if (workspace.branch === restoredBranch) continue
     const workspacePath = path.join(projectRoot, workspace.folderName)
