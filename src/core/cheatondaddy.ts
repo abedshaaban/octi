@@ -1,8 +1,7 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { loadState } from '../config/load'
-import { git } from '../git/exec'
-import { removeWorktree } from '../git/repo'
+import { isPrimaryWorktree, removeWorktree, resolveGitCommonDirFromState } from '../git/repo'
 import { findProjectRoot } from '../utils/findProjectRoot'
 
 export interface CheatOnDaddyInput {
@@ -29,36 +28,29 @@ export async function cheatOnDaddy(input: CheatOnDaddyInput): Promise<CheatOnDad
     throw new Error(`default base branch "${restoredBranch}" is not currently displayed`)
   }
 
-  const gmdDir = path.join(projectRoot, '.gmd')
-  const bareGitDir = path.join(gmdDir, 'repo.git')
   const stateDir = path.join(projectRoot, 'state')
-  const normalGitDir = path.join(projectRoot, '.git')
-
-  await fs.access(bareGitDir)
+  const gitDir = await resolveGitCommonDirFromState(projectRoot, state)
+  const restoredWorkspacePath = path.join(projectRoot, restoredWorkspace.folderName)
 
   const removedWorkspaces: Array<string> = []
   for (const workspace of state.workspaces) {
-    if (workspace.branch === restoredBranch) continue
     const workspacePath = path.join(projectRoot, workspace.folderName)
-    await removeWorktree(bareGitDir, workspacePath)
+    const isPrimary = workspace.folderName === '.' || (await isPrimaryWorktree(gitDir, workspacePath))
+    if (workspace.branch === restoredBranch || isPrimary) continue
+
+    await removeWorktree(gitDir, workspacePath)
     removedWorkspaces.push(workspace.branch)
   }
 
-  const restoredWorkspacePath = path.join(projectRoot, restoredWorkspace.folderName)
-  await removeWorktree(bareGitDir, restoredWorkspacePath)
+  if (restoredWorkspace.folderName !== '.') {
+    const entries = await fs.readdir(restoredWorkspacePath)
+    for (const name of entries) {
+      await fs.rename(path.join(restoredWorkspacePath, name), path.join(projectRoot, name))
+    }
+    await fs.rm(restoredWorkspacePath, { recursive: true, force: true })
+  }
 
-  // Replace any legacy root .git with the gmd-managed bare git directory.
-  await fs.rm(normalGitDir, { recursive: true, force: true })
-  await fs.rename(bareGitDir, normalGitDir)
-
-  await git(['config', 'core.bare', 'false'], { gitDir: normalGitDir })
-  await git(['config', 'core.worktree', projectRoot], { gitDir: normalGitDir })
-
-  await git(['checkout', '-f', restoredBranch], { gitDir: normalGitDir, cwd: projectRoot })
-
-  await fs.rm(restoredWorkspacePath, { recursive: true, force: true })
   await fs.rm(stateDir, { recursive: true, force: true })
-  await fs.rm(gmdDir, { recursive: true, force: true })
 
   return {
     projectRoot,

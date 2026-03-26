@@ -268,7 +268,7 @@ Reverse `gmd` setup for the current project:
 
 - removes all tracked workspace folders
 - restores the repository root as the main working tree on your default base branch
-- removes `state/` and `.gmd/` metadata so the project behaves like a normal Git repo again
+- removes `state/` metadata so the project behaves like a normal Git repo again
 
 ## Under the Hood
 
