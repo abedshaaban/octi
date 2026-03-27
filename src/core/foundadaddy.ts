@@ -86,43 +86,50 @@ export async function foundADaddy(input: FoundADaddyInput): Promise<FoundADaddyR
     ? await promptSelect('Select your default base branch for new workspaces', remoteBranches, preferredDefault)
     : preferredDefault
 
-  await ensureLocalBranch(commonDir, defaultBaseBranch, defaultBaseBranch, true)
-
   const { stdout: headOut } = await git(['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: projectRoot })
   const currentBranch = headOut.trim()
 
-  let workspacePath: string
-  let folderName: string
+  if (currentBranch === 'HEAD') {
+    throw new Error('cannot initialize from a detached HEAD; check out a branch first')
+  }
 
-  if (currentBranch !== 'HEAD' && currentBranch === defaultBaseBranch) {
-    // Same layout as `gmd clone`: `<projectRoot>/<defaultBranch>/` holds the repo; `state/` lives at `projectRoot`.
-    workspacePath = await relocateProjectIntoBranchFolder(projectRoot, defaultBaseBranch)
-    folderName = defaultBaseBranch
-  } else {
-    const workspaceFolderName = branchToFolderSlug(defaultBaseBranch)
-    workspacePath = path.join(projectRoot, workspaceFolderName)
+  const currentWorkspaceFolderName = branchToFolderSlug(currentBranch)
+  const workspacePath = await relocateProjectIntoBranchFolder(projectRoot, currentWorkspaceFolderName)
+
+  const relocatedCommonDir = await resolveGitCommonDir(workspacePath)
+  await ensureLocalBranch(relocatedCommonDir, defaultBaseBranch, defaultBaseBranch, true)
+
+  const workspaces: ProjectState['workspaces'] = [
+    {
+      branch: currentBranch,
+      folderName: currentWorkspaceFolderName,
+      goal: ''
+    }
+  ]
+
+  if (currentBranch !== defaultBaseBranch) {
+    const defaultWorkspaceFolderName = branchToFolderSlug(defaultBaseBranch)
+    const defaultWorkspacePath = path.join(projectRoot, defaultWorkspaceFolderName)
     try {
-      await fs.mkdir(workspacePath, { recursive: false })
+      await fs.mkdir(defaultWorkspacePath, { recursive: false })
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === 'EEXIST') {
-        throw new Error(`workspace folder "${workspaceFolderName}" already exists`)
+        throw new Error(`workspace folder "${defaultWorkspaceFolderName}" already exists`)
       }
       throw error
     }
-    await createWorktree(commonDir, workspacePath, defaultBaseBranch)
-    folderName = workspaceFolderName
+    await createWorktree(relocatedCommonDir, defaultWorkspacePath, defaultBaseBranch)
+    workspaces.push({
+      branch: defaultBaseBranch,
+      folderName: defaultWorkspaceFolderName,
+      goal: ''
+    })
   }
 
   const state: ProjectState = {
     defaultBaseBranch,
     settings,
-    workspaces: [
-      {
-        branch: defaultBaseBranch,
-        folderName,
-        goal: ''
-      }
-    ]
+    workspaces
   }
 
   await saveState(projectRoot, state)
