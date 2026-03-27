@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { resolveCliBehavior, resolveFallbackCliBehavior } from '../../../src/cli/behavior'
+import { getGlobalCliOptions } from '../../../src/cli/options'
+import { printError, printResult } from '../../../src/cli/output'
 import { executeCommand } from '../../../src/commands/_shared'
 import { InvalidProjectStateError } from '../../../src/config/errors'
+import { repairInvalidProjectState } from '../../../src/config/repair'
 
 vi.mock('../../../src/cli/behavior', () => ({
   resolveCliBehavior: vi.fn(),
@@ -19,11 +23,6 @@ vi.mock('../../../src/cli/output', () => ({
 vi.mock('../../../src/config/repair', () => ({
   repairInvalidProjectState: vi.fn()
 }))
-
-import { resolveCliBehavior, resolveFallbackCliBehavior } from '../../../src/cli/behavior'
-import { getGlobalCliOptions } from '../../../src/cli/options'
-import { printError, printResult } from '../../../src/cli/output'
-import { repairInvalidProjectState } from '../../../src/config/repair'
 
 describe('executeCommand', () => {
   beforeEach(() => {

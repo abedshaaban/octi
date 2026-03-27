@@ -1,5 +1,20 @@
 import { Command } from 'commander'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { getGlobalCliOptions } from '../../../src/cli/options'
+import { registerFoundADaddyCommand } from '../../../src/commands/foundadaddy'
+import { registerNewCommand } from '../../../src/commands/new'
+import { registerSetGoalCommand } from '../../../src/commands/setgoal'
+import { registerShowGoalCommand } from '../../../src/commands/showgoal'
+import { registerUpdateCommand } from '../../../src/commands/update'
+import { executeCommand } from '../../../src/commands/_shared'
+import { foundADaddy } from '../../../src/core/foundadaddy'
+import {
+  createNewWorkspace,
+  setWorkspaceGoal,
+  showWorkspaceGoal,
+  updateDefaultBaseBranch
+} from '../../../src/core/workspace'
+import { promptInput } from '../../../src/utils/prompt'
 
 vi.mock('../../../src/commands/_shared', () => ({
   executeCommand: vi.fn()
@@ -23,22 +38,6 @@ vi.mock('../../../src/utils/prompt', () => ({
 vi.mock('../../../src/cli/options', () => ({
   getGlobalCliOptions: vi.fn()
 }))
-
-import { getGlobalCliOptions } from '../../../src/cli/options'
-import { registerFoundADaddyCommand } from '../../../src/commands/foundadaddy'
-import { registerNewCommand } from '../../../src/commands/new'
-import { registerSetGoalCommand } from '../../../src/commands/setgoal'
-import { registerShowGoalCommand } from '../../../src/commands/showgoal'
-import { registerUpdateCommand } from '../../../src/commands/update'
-import { executeCommand } from '../../../src/commands/_shared'
-import { foundADaddy } from '../../../src/core/foundadaddy'
-import {
-  createNewWorkspace,
-  setWorkspaceGoal,
-  showWorkspaceGoal,
-  updateDefaultBaseBranch
-} from '../../../src/core/workspace'
-import { promptInput } from '../../../src/utils/prompt'
 
 describe('basic command actions', () => {
   let behavior = { json: true, interactive: false }

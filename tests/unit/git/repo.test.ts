@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { git } from '../../../src/git/exec'
 import {
   detectDefaultBranch,
   detectDefaultBranchFromRemoteUrl,
@@ -10,8 +11,6 @@ import {
 vi.mock('../../../src/git/exec', () => ({
   git: vi.fn()
 }))
-
-import { git } from '../../../src/git/exec'
 
 describe('git repo helpers', () => {
   beforeEach(() => {

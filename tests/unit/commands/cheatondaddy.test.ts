@@ -1,12 +1,11 @@
 import { Command } from 'commander'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { registerCheatOnDaddyCommand } from '../../../src/commands/cheatondaddy'
+import { cheatOnDaddy } from '../../../src/core/cheatondaddy'
 
 vi.mock('../../../src/core/cheatondaddy', () => ({
   cheatOnDaddy: vi.fn()
 }))
-
-import { registerCheatOnDaddyCommand } from '../../../src/commands/cheatondaddy'
-import { cheatOnDaddy } from '../../../src/core/cheatondaddy'
 
 describe('cheatondaddy command', () => {
   beforeEach(() => {

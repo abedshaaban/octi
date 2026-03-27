@@ -2,7 +2,9 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { InvalidProjectStateError } from '../../../src/config/errors'
+import { listRemoteBranches, resolveGitCommonDir } from '../../../src/git/repo'
 import { repairInvalidProjectState } from '../../../src/config/repair'
+import { promptInput, promptSelect } from '../../../src/utils/prompt'
 import { createTempDir } from '../../helpers/tempDir'
 
 vi.mock('../../../src/git/repo', () => ({
@@ -14,9 +16,6 @@ vi.mock('../../../src/utils/prompt', () => ({
   promptInput: vi.fn(),
   promptSelect: vi.fn()
 }))
-
-import { listRemoteBranches, resolveGitCommonDir } from '../../../src/git/repo'
-import { promptInput, promptSelect } from '../../../src/utils/prompt'
 
 const tempDirs: Array<string> = []
 

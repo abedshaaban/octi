@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { loadState } from '../../../src/config/load'
 import { resolveCliBehavior } from '../../../src/cli/behavior'
+import { findProjectRoot } from '../../../src/utils/findProjectRoot'
 import { setWritableValue } from '../../helpers/tty'
 
 vi.mock('../../../src/config/load', () => ({
@@ -9,9 +11,6 @@ vi.mock('../../../src/config/load', () => ({
 vi.mock('../../../src/utils/findProjectRoot', () => ({
   findProjectRoot: vi.fn()
 }))
-
-import { loadState } from '../../../src/config/load'
-import { findProjectRoot } from '../../../src/utils/findProjectRoot'
 
 describe('resolveCliBehavior', () => {
   let restoreStdin: (() => void) | undefined

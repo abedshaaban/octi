@@ -1,5 +1,15 @@
 import { Command } from 'commander'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { printInfo } from '../../../src/cli/output'
+import { registerCleanCommand } from '../../../src/commands/clean'
+import { registerHideCommand } from '../../../src/commands/hide'
+import { registerShowCommand } from '../../../src/commands/show'
+import { executeCommand } from '../../../src/commands/_shared'
+import { loadState } from '../../../src/config/load'
+import { cleanWorkspaces, hideWorkspace, showWorkspace } from '../../../src/core/workspace'
+import { fetchLatest, listLocalBranches, listRemoteBranches, resolveGitCommonDirFromState } from '../../../src/git/repo'
+import { findProjectRoot } from '../../../src/utils/findProjectRoot'
+import { promptInput, promptSelect } from '../../../src/utils/prompt'
 
 vi.mock('../../../src/commands/_shared', () => ({
   executeCommand: vi.fn()
@@ -34,17 +44,6 @@ vi.mock('../../../src/utils/prompt', () => ({
   promptInput: vi.fn(),
   promptSelect: vi.fn()
 }))
-
-import { printInfo } from '../../../src/cli/output'
-import { registerCleanCommand } from '../../../src/commands/clean'
-import { registerHideCommand } from '../../../src/commands/hide'
-import { registerShowCommand } from '../../../src/commands/show'
-import { executeCommand } from '../../../src/commands/_shared'
-import { loadState } from '../../../src/config/load'
-import { cleanWorkspaces, hideWorkspace, showWorkspace } from '../../../src/core/workspace'
-import { fetchLatest, listLocalBranches, listRemoteBranches, resolveGitCommonDirFromState } from '../../../src/git/repo'
-import { findProjectRoot } from '../../../src/utils/findProjectRoot'
-import { promptInput, promptSelect } from '../../../src/utils/prompt'
 
 describe('show, hide, and clean command actions', () => {
   let behavior = { json: true, interactive: false }

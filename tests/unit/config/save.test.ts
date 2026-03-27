@@ -48,11 +48,7 @@ describe('withStateLock', () => {
     const projectRoot = await createTempDir('state-lock-throw')
     tempDirs.push(projectRoot)
 
-    await expect(
-      withStateLock(projectRoot, async () => {
-        throw new Error('boom')
-      })
-    ).rejects.toThrow('boom')
+    await expect(withStateLock(projectRoot, () => Promise.reject(new Error('boom')))).rejects.toThrow('boom')
 
     await expect(fs.access(path.join(projectRoot, 'state', 'branches.lock'))).rejects.toMatchObject({ code: 'ENOENT' })
   })
@@ -66,7 +62,7 @@ describe('withStateLock', () => {
     await fs.mkdir(stateDir, { recursive: true })
     await fs.writeFile(lockPath, '123\n', 'utf8')
 
-    const pending = withStateLock(projectRoot, async () => 'acquired')
+    const pending = withStateLock(projectRoot, () => Promise.resolve('acquired'))
     const releaseTimer = setTimeout(async () => {
       await fs.unlink(lockPath)
     }, 150)
@@ -83,7 +79,9 @@ describe('withStateLock', () => {
     const openSpy = vi.spyOn(fs, 'open').mockRejectedValue(existsError as never)
     const nowSpy = vi.spyOn(Date, 'now').mockReturnValueOnce(0).mockReturnValueOnce(10_001)
 
-    await expect(withStateLock(projectRoot, async () => 'never')).rejects.toThrow('timed out waiting for state lock')
+    await expect(withStateLock(projectRoot, () => Promise.resolve('never'))).rejects.toThrow(
+      'timed out waiting for state lock'
+    )
 
     openSpy.mockRestore()
     nowSpy.mockRestore()

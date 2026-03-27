@@ -1,4 +1,8 @@
-export function setWritableValue<T extends object, K extends keyof T>(target: T, key: K, value: T[K]): () => void {
+export function setWritableValue<T extends object, TKey extends keyof T>(
+  target: T,
+  key: TKey,
+  value: T[TKey]
+): () => void {
   const original = Object.getOwnPropertyDescriptor(target, key)
 
   Object.defineProperty(target, key, {

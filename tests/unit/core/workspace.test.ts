@@ -1,7 +1,18 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { loadState } from '../../../src/config/load'
+import { saveState, withStateLock } from '../../../src/config/save'
 import { createNewWorkspace } from '../../../src/core/workspace'
+import {
+  createWorktree,
+  ensureBaseBranchExists,
+  ensureLocalBranch,
+  fetchLatest,
+  remoteBranchExists,
+  resolveGitCommonDirFromState
+} from '../../../src/git/repo'
+import { findProjectRoot } from '../../../src/utils/findProjectRoot'
 import { createTempDir } from '../../helpers/tempDir'
 
 vi.mock('../../../src/utils/findProjectRoot', () => ({
@@ -29,18 +40,6 @@ vi.mock('../../../src/git/repo', () => ({
   removeWorktree: vi.fn(),
   resolveGitCommonDirFromState: vi.fn()
 }))
-
-import { loadState } from '../../../src/config/load'
-import { saveState, withStateLock } from '../../../src/config/save'
-import {
-  createWorktree,
-  ensureBaseBranchExists,
-  ensureLocalBranch,
-  fetchLatest,
-  remoteBranchExists,
-  resolveGitCommonDirFromState
-} from '../../../src/git/repo'
-import { findProjectRoot } from '../../../src/utils/findProjectRoot'
 
 const tempDirs: Array<string> = []
 

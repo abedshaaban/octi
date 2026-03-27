@@ -1,7 +1,11 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { saveState } from '../../../src/config/save'
 import { cloneProject } from '../../../src/core/project'
+import { git } from '../../../src/git/exec'
+import { detectDefaultBranchFromRemoteUrl, listRemoteBranchesFromUrl, resolveGitCommonDir } from '../../../src/git/repo'
+import { promptSelect } from '../../../src/utils/prompt'
 import { createTempDir } from '../../helpers/tempDir'
 
 vi.mock('../../../src/git/repo', () => ({
@@ -21,11 +25,6 @@ vi.mock('../../../src/config/save', () => ({
 vi.mock('../../../src/utils/prompt', () => ({
   promptSelect: vi.fn()
 }))
-
-import { saveState } from '../../../src/config/save'
-import { git } from '../../../src/git/exec'
-import { detectDefaultBranchFromRemoteUrl, listRemoteBranchesFromUrl, resolveGitCommonDir } from '../../../src/git/repo'
-import { promptSelect } from '../../../src/utils/prompt'
 
 const tempDirs: Array<string> = []
 
