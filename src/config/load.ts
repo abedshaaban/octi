@@ -1,7 +1,8 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { InvalidProjectStateError, type ProjectStateIssue } from './errors'
+import { InvalidProjectStateError  } from './errors'
 import { DEFAULT_PROJECT_SETTINGS } from './types'
+import type {ProjectStateIssue} from './errors';
 import type { ProjectState } from './types'
 
 function normalizeWorkspaces(parsed: Partial<ProjectState>): ProjectState['workspaces'] {

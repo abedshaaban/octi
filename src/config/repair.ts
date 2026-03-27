@@ -4,7 +4,7 @@ import { listRemoteBranches, resolveGitCommonDir } from '../git/repo'
 import { promptInput, promptSelect } from '../utils/prompt'
 import { saveState } from './save'
 import { DEFAULT_PROJECT_SETTINGS } from './types'
-import { InvalidProjectStateError } from './errors'
+import type { InvalidProjectStateError } from './errors'
 import type { ProjectState } from './types'
 
 function normalizeWorkspaces(parsed: Partial<ProjectState>): ProjectState['workspaces'] {
