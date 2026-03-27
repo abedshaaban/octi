@@ -1,20 +1,14 @@
 import { cheatOnDaddy } from '../core/cheatondaddy'
+import { executeCommand } from './_shared'
 import type { Command } from 'commander'
 
 export function registerCheatOnDaddyCommand(program: Command) {
   program
     .command('cheatondaddy')
     .description('Undo gmd workspace layout and restore a normal git repository')
-    .action(async () => {
-      try {
-        const result = await cheatOnDaddy({ cwd: process.cwd() })
-
-        console.log(JSON.stringify(result, null, 2))
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Unknown error occurred'
-
-        console.error(message)
-        process.exitCode = 1
-      }
+    .action(async (_options: object, command: Command) => {
+      await executeCommand(command, async () => {
+        return cheatOnDaddy({ cwd: process.cwd() })
+      })
     })
 }

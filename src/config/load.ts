@@ -1,31 +1,9 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { InvalidProjectStateError } from './errors'
-import { DEFAULT_PROJECT_SETTINGS } from './types'
+import { normalizeSettings, normalizeWorkspaces } from './normalize'
 import type { ProjectStateIssue } from './errors'
 import type { ProjectState } from './types'
-
-function normalizeWorkspaces(parsed: Partial<ProjectState>): ProjectState['workspaces'] {
-  const rawEntries = Array.isArray(parsed.workspaces) ? parsed.workspaces : []
-
-  return rawEntries.map((entry) => {
-    const record = entry as unknown as Record<string, unknown>
-    return {
-      branch: String(record.branch ?? ''),
-      folderName: String(record.folderName ?? record.folder ?? record.path ?? ''),
-      goal: String(record.goal ?? '')
-    }
-  })
-}
-
-function normalizeSettings(parsed: Partial<ProjectState>): ProjectState['settings'] {
-  const record = (parsed.settings ?? {}) as Partial<ProjectState['settings']>
-
-  return {
-    json: typeof record.json === 'boolean' ? record.json : DEFAULT_PROJECT_SETTINGS.json,
-    interactive: typeof record.interactive === 'boolean' ? record.interactive : DEFAULT_PROJECT_SETTINGS.interactive
-  }
-}
 
 function normalizeDefaultBaseBranch(parsed: Partial<ProjectState>): ProjectState['defaultBaseBranch'] {
   return parsed.defaultBaseBranch as ProjectState['defaultBaseBranch']

@@ -12,11 +12,12 @@ import { registerSetGoalCommand } from '../commands/setgoal'
 import { registerShowCommand } from '../commands/show'
 import { registerShowGoalCommand } from '../commands/showgoal'
 import { registerUpdateCommand } from '../commands/update'
+import { CLI_VERSION } from './version'
 
 export function createCli() {
   const program = new Command()
 
-  program.name('gitmedaddy').description('Thin Git integration layer').version('0.0.18', '-v, --version')
+  program.name('gitmedaddy').description('Thin Git integration layer').version(CLI_VERSION, '-v, --version')
   program.option('--json', 'Force JSON output for this command')
   program.option('--no-json', 'Force text output for this command')
   program.option('--interactive', 'Force interactive prompts for this command')

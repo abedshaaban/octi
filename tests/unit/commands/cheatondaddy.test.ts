@@ -1,7 +1,12 @@
 import { Command } from 'commander'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { registerCheatOnDaddyCommand } from '../../../src/commands/cheatondaddy'
+import { executeCommand } from '../../../src/commands/_shared'
 import { cheatOnDaddy } from '../../../src/core/cheatondaddy'
+
+vi.mock('../../../src/commands/_shared', () => ({
+  executeCommand: vi.fn()
+}))
 
 vi.mock('../../../src/core/cheatondaddy', () => ({
   cheatOnDaddy: vi.fn()
@@ -9,41 +14,19 @@ vi.mock('../../../src/core/cheatondaddy', () => ({
 
 describe('cheatondaddy command', () => {
   beforeEach(() => {
+    vi.mocked(executeCommand).mockReset()
     vi.mocked(cheatOnDaddy).mockReset()
-    process.exitCode = undefined
+    vi.mocked(executeCommand).mockImplementation(async (_command, run) => run({ json: true, interactive: false }))
   })
 
-  it('prints the JSON result to stdout on success', async () => {
-    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    vi.mocked(cheatOnDaddy).mockResolvedValue({ restored: true })
+  it('routes through executeCommand and forwards cwd', async () => {
+    vi.mocked(cheatOnDaddy).mockResolvedValue({ restored: true } as never)
     const program = new Command()
     registerCheatOnDaddyCommand(program)
 
     await program.parseAsync(['node', 'test', 'cheatondaddy'])
 
+    expect(executeCommand).toHaveBeenCalledTimes(1)
     expect(cheatOnDaddy).toHaveBeenCalledWith({ cwd: process.cwd() })
-    expect(logSpy).toHaveBeenCalledWith(JSON.stringify({ restored: true }, null, 2))
-    expect(errorSpy).not.toHaveBeenCalled()
-
-    logSpy.mockRestore()
-    errorSpy.mockRestore()
-  })
-
-  it('prints the error message and sets exitCode on failure', async () => {
-    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-    vi.mocked(cheatOnDaddy).mockRejectedValue(new Error('restore failed'))
-    const program = new Command()
-    registerCheatOnDaddyCommand(program)
-
-    await program.parseAsync(['node', 'test', 'cheatondaddy'])
-
-    expect(errorSpy).toHaveBeenCalledWith('restore failed')
-    expect(logSpy).not.toHaveBeenCalled()
-    expect(process.exitCode).toBe(1)
-
-    logSpy.mockRestore()
-    errorSpy.mockRestore()
   })
 })
